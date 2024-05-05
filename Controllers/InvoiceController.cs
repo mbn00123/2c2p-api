@@ -163,14 +163,17 @@ namespace InvoiceAPI.Controllers
                         var csvRecords = csvMapper.MapCsvContentToClass(fileContent);
                         //return Ok(csvRecords);
                         // *** validate ***
+                        var errors = InvoiceCsvValidator.Validate(csvRecords);
+
+                        if (errors.Count > 0) return BadRequest(string.Join(Environment.NewLine, errors));
 
                         uploadInvoices = csvRecords.Select(x => new InvoiceTempModel()
                         {
                             uuid = uuid,
                             TransactionId = x.TransactionIdentificator,
-                            Amount = (decimal)x.Amount,
+                            Amount = decimal.Parse(x.Amount),
                             CurrencyCode = x.CurrencyCode,
-                            TransactionDate = (DateTime)x.TransactionDate,
+                            TransactionDate = DateTime.ParseExact(x.TransactionDate, "dd/MM/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
                             Status = InvoiceStatusMapper.Get(x.Status)
                         }).ToList();
                     }
