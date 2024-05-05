@@ -58,14 +58,6 @@ namespace InvoiceAPI.Controllers
         {
             try
             {
-                //var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
-                //{
-                //    PageIndex = request.PageIndex,
-                //    PageSize = request.PageSize,
-                //    Currency = request.Currency,
-                //});
-                //return Ok(results);
-
                 var totalRecord = _invoiceDAL.Count(new SearchInvoiceCriteriaModel()
                 {
                     Currency = request.Currency,
@@ -100,14 +92,6 @@ namespace InvoiceAPI.Controllers
         {
             try
             {
-                //var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
-                //{
-                //    PageIndex = request.PageIndex,
-                //    PageSize = request.PageSize,
-                //    StartDate = request.StartDate,
-                //    EndDate = request.EndDate,
-                //});
-                //return Ok(results);
 
                 var totalRecord = _invoiceDAL.Count(new SearchInvoiceCriteriaModel()
                 {
@@ -140,7 +124,7 @@ namespace InvoiceAPI.Controllers
             }
         }
 
-        [HttpPost(Name = "upload")]
+        [HttpPost(Name = "UploadFile")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)

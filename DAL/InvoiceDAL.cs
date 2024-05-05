@@ -122,7 +122,7 @@ namespace InvoiceAPI.DAL
                         command.Parameters.AddWithValue("@pCurrency", (object)model.Currency ?? DBNull.Value);
                         command.Parameters.AddWithValue("@pStatus", (object)model.Status ?? DBNull.Value);
                         command.Parameters.AddWithValue("@pStartDate", (object)model.StartDate?.Date ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@pEndDate", (object)model.EndDate?Date ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pEndDate", (object)model.EndDate?.Date ?? DBNull.Value);
 
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
