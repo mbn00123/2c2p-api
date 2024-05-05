@@ -3,6 +3,7 @@ using InvoiceAPI.ModelViews;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.Reflection;
 using System.Transactions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -120,6 +121,45 @@ namespace InvoiceAPI.DAL
                     // Write the data to the SQL Server table
                     bulkCopy.WriteToServer(CreateDataTable(invoices));
                 }
+            }
+        }
+
+        public void InsertInvoiceFromTempTalbe(string uuid)
+        {
+            try
+            {
+                //WHEN MATCHED ==> Update
+                //WHEN NOT MATCHED ==> Insert
+                string sql = @"
+                MERGE INTO invoice AS target
+                USING ( SELECT * FROM invoice_temp WHERE uuid = @pUUID ) AS source
+                ON target.TransactionId = source.TransactionId
+                
+                WHEN MATCHED THEN
+                    UPDATE SET
+                        target.Amount = source.Amount,
+                        target.CurrencyCode = source.CurrencyCode,
+                        target.TransactionDate = source.TransactionDate,
+                        target.Status = source.Status
+                
+                WHEN NOT MATCHED BY TARGET THEN
+                    INSERT (TransactionId, Amount, CurrencyCode, TransactionDate, Status)
+                    VALUES (source.TransactionId, source.Amount, source.CurrencyCode, source.TransactionDate, source.Status);
+                ";
+
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@pUUID", uuid);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

@@ -146,6 +146,7 @@ namespace InvoiceAPI.Controllers
                     }
 
                     _invoiceDAL.BulkInsertIntoInvoiceTemp(uploadInvoices);
+                    _invoiceDAL.InsertInvoiceFromTempTalbe(uuid);
                     return Ok();
                 }
             }
