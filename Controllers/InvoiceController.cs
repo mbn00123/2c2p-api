@@ -1,4 +1,6 @@
-﻿using InvoiceAPI.DAL;
+﻿using CsvHelper;
+using InvoiceAPI.DAL;
+using InvoiceAPI.Helpers;
 using InvoiceAPI.Models;
 using InvoiceAPI.ModelViews;
 using Microsoft.AspNetCore.Mvc;
@@ -104,6 +106,17 @@ namespace InvoiceAPI.Controllers
                 using (var reader = new StreamReader(file.OpenReadStream()))
                 {
                     var fileContent = await reader.ReadToEndAsync();
+
+                    if(fileExtension == ".csv")
+                    {
+                        var csvMapper = new InvoiceCsvMapper();
+                        var csvRecords = csvMapper.MapCsvContentToClass(fileContent);
+                        return Ok(csvRecords);
+                    }
+                    else
+                    {
+
+                    }
 
                     // Do whatever you need with the file content
                     // For example, you can save it to a file or process it further
