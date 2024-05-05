@@ -115,13 +115,10 @@ namespace InvoiceAPI.Controllers
                     }
                     else
                     {
-
+                        var xmlMapper = new InvoiceXMLMapper();
+                        var transactionList = xmlMapper.MapXmlContentToClass(fileContent);
+                        return Ok(transactionList);
                     }
-
-                    // Do whatever you need with the file content
-                    // For example, you can save it to a file or process it further
-                    // Here, we simply return the content as a response
-                    return Ok(fileContent);
                 }
             }
             catch (Exception ex)
