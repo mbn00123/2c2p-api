@@ -90,5 +90,58 @@ namespace InvoiceAPI.DAL
 
             return results;
         }
+
+        public void BulkInsertIntoInvoiceTemp(List<InvoiceTempModel> invoices)
+        {
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+
+                // Create a SqlBulkCopy object
+                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection))
+                {
+                    // Set the destination table name
+                    bulkCopy.DestinationTableName = "Invoice_temp";
+
+                    // Map the columns from the source data to the destination table
+                    bulkCopy.ColumnMappings.Add("uuid", "uuid");
+                    bulkCopy.ColumnMappings.Add("TransactionId", "TransactionId");
+                    bulkCopy.ColumnMappings.Add("Amount", "Amount");
+                    bulkCopy.ColumnMappings.Add("CurrencyCode", "CurrencyCode");
+                    bulkCopy.ColumnMappings.Add("TransactionDate", "TransactionDate");
+                    bulkCopy.ColumnMappings.Add("Status", "Status");
+
+                    // Set the batch size (optional)
+                    bulkCopy.BatchSize = 1000;
+
+                    // Set the timeout (optional)
+                    bulkCopy.BulkCopyTimeout = 600; // in seconds
+
+                    // Write the data to the SQL Server table
+                    bulkCopy.WriteToServer(CreateDataTable(invoices));
+                }
+            }
+        }
+
+        private DataTable CreateDataTable(List<InvoiceTempModel> invoices)
+        {
+            DataTable dataTable = new DataTable();
+
+            // Add columns to the DataTable
+            dataTable.Columns.Add("uuid", typeof(string));
+            dataTable.Columns.Add("TransactionId", typeof(string));
+            dataTable.Columns.Add("Amount", typeof(decimal));
+            dataTable.Columns.Add("CurrencyCode", typeof(string));
+            dataTable.Columns.Add("TransactionDate", typeof(DateTime));
+            dataTable.Columns.Add("Status", typeof(string));
+
+            // Add rows to the DataTable
+            foreach (var invoice in invoices)
+            {
+                dataTable.Rows.Add(invoice.uuid, invoice.TransactionId, invoice.Amount, invoice.CurrencyCode, invoice.TransactionDate, invoice.Status);
+            }
+
+            return dataTable;
+        }
     }
 }

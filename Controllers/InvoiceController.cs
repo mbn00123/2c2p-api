@@ -107,7 +107,8 @@ namespace InvoiceAPI.Controllers
                 using (var reader = new StreamReader(file.OpenReadStream()))
                 {
                     var fileContent = await reader.ReadToEndAsync();
-                    List<InvoiceModel> uploadInvoices = new List<InvoiceModel>();
+                    string uuid = Guid.NewGuid().ToString();
+                    List<InvoiceTempModel> uploadInvoices = new List<InvoiceTempModel>();
 
                     if (fileExtension == ".csv")
                     {
@@ -116,13 +117,14 @@ namespace InvoiceAPI.Controllers
                         //return Ok(csvRecords);
                         // *** validate ***
 
-                        uploadInvoices = csvRecords.Select(x => new InvoiceModel()
+                        uploadInvoices = csvRecords.Select(x => new InvoiceTempModel()
                         {
+                            uuid = uuid,
                             TransactionId = x.TransactionIdentificator,
                             Amount = (decimal)x.Amount,
                             CurrencyCode = x.CurrencyCode,
                             TransactionDate = (DateTime)x.TransactionDate,
-                            Status = x.Status
+                            Status = InvoiceStatusMapper.Get(x.Status)
                         }).ToList();
                     }
                     else
@@ -132,18 +134,19 @@ namespace InvoiceAPI.Controllers
                         //return Ok(transactionList);
                         // *** validate ***
 
-                        uploadInvoices = xmlRecords.Transactions.Select(x => new InvoiceModel()
+                        uploadInvoices = xmlRecords.Transactions.Select(x => new InvoiceTempModel()
                         {
+                            uuid = uuid,
                             TransactionId = x.Id,
                             Amount = (decimal)x.PaymentDetails.Amount,
                             CurrencyCode = x.PaymentDetails.CurrencyCode,
                             TransactionDate = (DateTime)x.TransactionDate,
-                            Status = x.Status
+                            Status = InvoiceStatusMapper.Get(x.Status)
                         }).ToList();
                     }
 
-
-                    return Ok(uploadInvoices);
+                    _invoiceDAL.BulkInsertIntoInvoiceTemp(uploadInvoices);
+                    return Ok();
                 }
             }
             catch (Exception ex)

@@ -6,7 +6,7 @@ using InvoiceAPI.ModelViews;
 namespace InvoiceAPI.Helpers
 {
     public class InvoiceCsvMapper
-{
+    {
         public List<InvoiceCsvRecord> MapCsvContentToClass(string csvContent)
         {
             using (var reader = new StringReader(csvContent))
