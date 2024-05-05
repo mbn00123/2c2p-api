@@ -161,8 +161,6 @@ namespace InvoiceAPI.Controllers
                     {
                         var csvMapper = new InvoiceCsvMapper();
                         var csvRecords = csvMapper.MapCsvContentToClass(fileContent);
-                        //return Ok(csvRecords);
-                        // *** validate ***
                         var errors = InvoiceCsvValidator.Validate(csvRecords);
 
                         if (errors.Count > 0) return BadRequest(string.Join(Environment.NewLine, errors));
@@ -181,16 +179,18 @@ namespace InvoiceAPI.Controllers
                     {
                         var xmlMapper = new InvoiceXMLMapper();
                         var xmlRecords = xmlMapper.MapXmlContentToClass(fileContent);
-                        //return Ok(transactionList);
-                        // *** validate ***
+
+                        var errors = InvoiceXMLValidator.Validate(xmlRecords);
+
+                        if (errors.Count > 0) return BadRequest(string.Join(Environment.NewLine, errors));
 
                         uploadInvoices = xmlRecords.Transactions.Select(x => new InvoiceTempModel()
                         {
                             uuid = uuid,
                             TransactionId = x.Id,
-                            Amount = (decimal)x.PaymentDetails.Amount,
+                            Amount = decimal.Parse(x.PaymentDetails.Amount),
                             CurrencyCode = x.PaymentDetails.CurrencyCode,
-                            TransactionDate = (DateTime)x.TransactionDate,
+                            TransactionDate = DateTime.ParseExact(x.TransactionDate, "yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture),
                             Status = InvoiceStatusMapper.Get(x.Status)
                         }).ToList();
                     }

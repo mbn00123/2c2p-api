@@ -19,7 +19,7 @@ namespace InvoiceAPI.ModelViews
             public string? Id { get; set; }
 
             [XmlElement("TransactionDate")]
-            public DateTime? TransactionDate { get; set; }
+            public string? TransactionDate { get; set; }
 
             public PaymentDetails PaymentDetails { get; set; }
 
@@ -30,7 +30,7 @@ namespace InvoiceAPI.ModelViews
         public class PaymentDetails
         {
             [XmlElement("Amount")]
-            public decimal? Amount { get; set; }
+            public string? Amount { get; set; }
 
             [XmlElement("CurrencyCode")]
             public string? CurrencyCode { get; set; }
