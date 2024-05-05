@@ -20,6 +20,65 @@ namespace InvoiceAPI.DAL
             ConnectionString = _config["ConnectionString"];
         }
 
+        public int Count(SearchInvoiceCriteriaModel model)
+        {
+            int totalRecord = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT COUNT(TransactionId) AS TotalRecord FROM Invoice WHERE 1=1";
+
+                    if (model.Currency != null)
+                    {
+                        sql += " AND CurrencyCode = @pCurrency";
+                    }
+
+                    if (model.Status != null)
+                    {
+                        sql += " AND Status = @pStatus";
+                    }
+
+                    if (model.StartDate != null)
+                    {
+                        sql += " AND TransactionDate >= @pStartDate";
+                    }
+
+                    if (model.EndDate != null)
+                    {
+                        model.EndDate = model.EndDate?.AddDays(1);
+                        sql += " AND TransactionDate < @pEndDate";
+                    }
+
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@pCurrency", (object)model.Currency ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pStatus", (object)model.Status ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pStartDate", (object)model.StartDate?.Date ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pEndDate", (object)model.EndDate?.Date ?? DBNull.Value);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                totalRecord = int.Parse(reader["TotalRecord"].ToString());
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+
+            return totalRecord;
+        }
+
         public IEnumerable<InvoiceViewModel> Search(SearchInvoiceCriteriaModel model)
         {
             List<InvoiceViewModel> results = new List<InvoiceViewModel>();
@@ -43,14 +102,12 @@ namespace InvoiceAPI.DAL
 
                     if (model.StartDate != null)
                     {
-                        model.StartDate = (DateTime)(model.StartDate?.Date); //remove time
                         sql += " AND TransactionDate >= @pStartDate";
                     }
 
                     if (model.EndDate != null)
                     {
-                        model.EndDate = (DateTime)(model.EndDate?.Date); //remove time
-                        model.EndDate?.AddDays(1);
+                        model.EndDate = model.EndDate?.AddDays(1);
                         sql += " AND TransactionDate < @pEndDate";
                     }
 
@@ -64,8 +121,8 @@ namespace InvoiceAPI.DAL
                         command.Parameters.AddWithValue("@pPageSize", model.PageSize);
                         command.Parameters.AddWithValue("@pCurrency", (object)model.Currency ?? DBNull.Value);
                         command.Parameters.AddWithValue("@pStatus", (object)model.Status ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@pStartDate", (object)model.StartDate ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@pEndDate", (object)model.EndDate ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pStartDate", (object)model.StartDate?.Date ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@pEndDate", (object)model.EndDate?Date ?? DBNull.Value);
 
                         using (SqlDataReader reader = command.ExecuteReader())
                         {

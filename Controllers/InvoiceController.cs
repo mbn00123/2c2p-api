@@ -5,6 +5,7 @@ using InvoiceAPI.Models;
 using InvoiceAPI.ModelViews;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace InvoiceAPI.Controllers
 {
@@ -24,12 +25,26 @@ namespace InvoiceAPI.Controllers
         {
             try
             {
-                var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                var totalRecord = _invoiceDAL.Count(new SearchInvoiceCriteriaModel()
                 {
-                    PageIndex = request.PageIndex,
-                    PageSize = request.PageSize,
                     Status = request.Status,
                 });
+
+                ResponsePaggingModel<InvoiceViewModel> results = new() { 
+                    PageIndex = request.PageIndex,
+                    TotalRecord = totalRecord,
+                    TotalPage = (totalRecord == 0) ? 0 : (int)Math.Ceiling((double)totalRecord / request.PageSize)
+                };
+
+                if (totalRecord > 0)
+                {
+                    results.data = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                    {
+                        PageIndex = request.PageIndex,
+                        PageSize = request.PageSize,
+                        Status = request.Status,
+                    });
+                }
                 return Ok(results);
             }
             catch (Exception ex)
@@ -43,12 +58,35 @@ namespace InvoiceAPI.Controllers
         {
             try
             {
-                var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                //var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                //{
+                //    PageIndex = request.PageIndex,
+                //    PageSize = request.PageSize,
+                //    Currency = request.Currency,
+                //});
+                //return Ok(results);
+
+                var totalRecord = _invoiceDAL.Count(new SearchInvoiceCriteriaModel()
                 {
-                    PageIndex = request.PageIndex,
-                    PageSize = request.PageSize,
                     Currency = request.Currency,
                 });
+
+                ResponsePaggingModel<InvoiceViewModel> results = new()
+                {
+                    PageIndex = request.PageIndex,
+                    TotalRecord = totalRecord,
+                    TotalPage = (totalRecord == 0) ? 0 : (int)Math.Ceiling((double)totalRecord / request.PageSize)
+                };
+
+                if (totalRecord > 0)
+                {
+                    results.data = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                    {
+                        PageIndex = request.PageIndex,
+                        PageSize = request.PageSize,
+                        Currency = request.Currency,
+                    });
+                }
                 return Ok(results);
             }
             catch (Exception ex)
@@ -62,13 +100,38 @@ namespace InvoiceAPI.Controllers
         {
             try
             {
-                var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                //var results = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                //{
+                //    PageIndex = request.PageIndex,
+                //    PageSize = request.PageSize,
+                //    StartDate = request.StartDate,
+                //    EndDate = request.EndDate,
+                //});
+                //return Ok(results);
+
+                var totalRecord = _invoiceDAL.Count(new SearchInvoiceCriteriaModel()
                 {
-                    PageIndex = request.PageIndex,
-                    PageSize = request.PageSize,
                     StartDate = request.StartDate,
                     EndDate = request.EndDate,
                 });
+
+                ResponsePaggingModel<InvoiceViewModel> results = new()
+                {
+                    PageIndex = request.PageIndex,
+                    TotalRecord = totalRecord,
+                    TotalPage = (totalRecord == 0) ? 0 : (int)Math.Ceiling((double)totalRecord / request.PageSize)
+                };
+
+                if (totalRecord > 0)
+                {
+                    results.data = _invoiceDAL.Search(new SearchInvoiceCriteriaModel()
+                    {
+                        PageIndex = request.PageIndex,
+                        PageSize = request.PageSize,
+                        StartDate = request.StartDate,
+                        EndDate = request.EndDate,
+                    });
+                }
                 return Ok(results);
             }
             catch (Exception ex)
