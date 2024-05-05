@@ -4,6 +4,7 @@ using InvoiceAPI.Helpers;
 using InvoiceAPI.Models;
 using InvoiceAPI.ModelViews;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace InvoiceAPI.Controllers
 {
@@ -106,19 +107,43 @@ namespace InvoiceAPI.Controllers
                 using (var reader = new StreamReader(file.OpenReadStream()))
                 {
                     var fileContent = await reader.ReadToEndAsync();
+                    List<InvoiceModel> uploadInvoices = new List<InvoiceModel>();
 
-                    if(fileExtension == ".csv")
+                    if (fileExtension == ".csv")
                     {
                         var csvMapper = new InvoiceCsvMapper();
                         var csvRecords = csvMapper.MapCsvContentToClass(fileContent);
-                        return Ok(csvRecords);
+                        //return Ok(csvRecords);
+                        // *** validate ***
+
+                        uploadInvoices = csvRecords.Select(x => new InvoiceModel()
+                        {
+                            TransactionId = x.TransactionIdentificator,
+                            Amount = (decimal)x.Amount,
+                            CurrencyCode = x.CurrencyCode,
+                            TransactionDate = (DateTime)x.TransactionDate,
+                            Status = x.Status
+                        }).ToList();
                     }
                     else
                     {
                         var xmlMapper = new InvoiceXMLMapper();
-                        var transactionList = xmlMapper.MapXmlContentToClass(fileContent);
-                        return Ok(transactionList);
+                        var xmlRecords = xmlMapper.MapXmlContentToClass(fileContent);
+                        //return Ok(transactionList);
+                        // *** validate ***
+
+                        uploadInvoices = xmlRecords.Transactions.Select(x => new InvoiceModel()
+                        {
+                            TransactionId = x.Id,
+                            Amount = (decimal)x.PaymentDetails.Amount,
+                            CurrencyCode = x.PaymentDetails.CurrencyCode,
+                            TransactionDate = (DateTime)x.TransactionDate,
+                            Status = x.Status
+                        }).ToList();
                     }
+
+
+                    return Ok(uploadInvoices);
                 }
             }
             catch (Exception ex)
